@@ -58,12 +58,12 @@ class TagRegistry:
 
     tags: typing.Dict[int, typing.Type[Tag]] = field(default_factory=dict)
 
-    def add(self, tag: typing.Type[Tag]):
+    def add(self, *tag: typing.Type[Tag]):
         """Add a tag to the registry.
         Args:
             tag: The tag added to the registry.
         """
-        self.tags.update({tag.id: tag})
+        self.tags.update({t.id: t for t in tag})
 
     def get(self, tag_code: int) -> typing.Optional[typing.Type[Tag]]:
         """Get a tag from the registry.
