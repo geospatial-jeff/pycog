@@ -52,6 +52,9 @@ def write_ifd(ifd: IFD, endian: Endian) -> bytes:
 
 
 def write_cog(cog: Cog) -> bytes:
+    # Strip ghost header area
+    # https://gdal.org/drivers/raster/cog.html#header-ghost-area
+    cog.header.first_ifd_offset = 8
     cog_segments = [write_header(cog.header)]
 
     ifd_offset = cog.header.first_ifd_offset
