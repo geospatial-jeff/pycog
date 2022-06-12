@@ -12,7 +12,7 @@ class ImageWidth(Tag):
 
     id: typing.ClassVar[int] = 256
     name: typing.ClassVar[str] = "ImageWidth"
-    value: int
+    value: bytes
 
 
 @dataclass
@@ -23,7 +23,29 @@ class ImageHeight(Tag):
 
     id: typing.ClassVar[int] = 257
     name: typing.ClassVar[str] = "ImageHeight"
-    value: int
+    value: bytes
+
+
+@dataclass
+class TileOffsets(Tag):
+    """The byte offset to each compressed image tile.
+    https://www.awaresystems.be/imaging/tiff/tifftags/tileoffsets.html
+    """
+
+    id: typing.ClassVar[int] = 324
+    name: typing.ClassVar[str] = "TileOffsets"
+    value: bytes
+
+
+@dataclass
+class TileByteCounts(Tag):
+    """The number of bytes in each compressed image tile.
+    https://www.awaresystems.be/imaging/tiff/tifftags/tilebytecounts.html
+    """
+
+    id: typing.ClassVar[int] = 325
+    name: typing.ClassVar[str] = "TileByteCounts"
+    value: bytes
 
 
 @dataclass

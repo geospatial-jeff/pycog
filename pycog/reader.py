@@ -37,12 +37,15 @@ def read_tag(b: bytes, endian: Endian) -> typing.Optional[Tag]:
     count = int.from_bytes(b[4:8], endian.name)
     size = count * tag_type.length
 
+    # print(tag_cls, size)
+
     # Bytes 8-12 contain the tag value if it fits, otherwise
     # it contains an offset to where the tag value is stored.
     if size <= 4:
         tag_value = b[8 : 8 + size]
     else:
-        raise Exception("Not yet implemented")
+        value_offset = int.from_bytes(b[8:12], endian.name)
+        tag_value = b[value_offset : value_offset + size]
 
     return tag_cls(count=count, type=tag_type, value=tag_value)
 

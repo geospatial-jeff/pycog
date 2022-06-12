@@ -1,10 +1,12 @@
 from pycog.reader import open_cog
 from pycog.writer import write_cog
-from pycog.tags import tag_registry, ImageWidth, ImageHeight
+from pycog.tags import tag_registry, ImageWidth, ImageHeight, TileByteCounts, TileOffsets
 
 # Register ImageWidth and ImageHeight tags
 tag_registry.add(ImageWidth)
 tag_registry.add(ImageHeight)
+tag_registry.add(TileByteCounts)
+tag_registry.add(TileOffsets)
 
 # Open the COG.
 with open("cog.tif", "rb") as f:
