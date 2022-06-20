@@ -102,6 +102,7 @@ class Tag:
         id: A unique identifier for the TIFF tag (ex. 256).
         name: A human readable name for the TIFF tag (ex. ImageWidth).
         count: The number of values included in the tag (ex. 1).
+        size: The number of bytes in the tag value (ex. 6).
         type: The data type of the tag value (ex. TIFFShort).
         value: The serialized value of the TIFF tag (ex. \x08\x00).
     """
@@ -110,6 +111,7 @@ class Tag:
     name: typing.ClassVar[str]
     type: TagType
     count: int
+    size: int
     value: typing.Tuple[typing.Any]
 
 

@@ -76,7 +76,7 @@ def open_cog(file_handle: IOBase, header_size: int = 65536) -> Cog:
             decoded_tag_value = struct.unpack(
                 f"{header.endian.value}{count}{tag_type.format}", tag_value
             )
-            tag = tag_cls(count=count, type=tag_type, value=decoded_tag_value)
+            tag = tag_cls(count=count, type=tag_type, size=size, value=decoded_tag_value)
             tags[tag.name] = tag
 
         # Last 4 bytes of IFD contains offset to the next IFD.
