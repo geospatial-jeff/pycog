@@ -91,7 +91,7 @@ def open_cog(file_handle: IOBase, header_size: int = 65536) -> Cog:
 
 
 def read_tile(x: int, y: int, z: int, cog: Cog) -> bytes:
-    # Calculate how many columns there are in the appropriate IFD.
+    # Calculate number of columns in the IFD.
     ifd = cog.ifds[z]
     image_width = ifd.tags["ImageWidth"].value[0]
     tile_width = ifd.tags["TileWidth"].value[0]
@@ -105,18 +105,4 @@ def read_tile(x: int, y: int, z: int, cog: Cog) -> bytes:
     # Read the tile.
     cog.file_handle.seek(tile_offset)
     tile_content = cog.file_handle.read(tile_byte_count)
-
-    # Add JPEG/Huffman tables if necessary.
-    compression = ifd.tags["Compression"]
-    if compression.value[0] in {6, 7}:
-        # TODO: There are some places it doesn't make sense to deserialize tag value on read?
-        jpeg_tables = ifd.tags["JPEGTables"]
-        jpeg_table_bytes = struct.pack(
-            f"{cog.header.endian.value}{jpeg_tables.count}{jpeg_tables.type.format}",
-            *jpeg_tables.value,
-        )
-        # Insert tables, first removing the SOI and EOI.
-        # The data is now a valid JPEG image.
-        tile_content = tile_content[:2] + jpeg_table_bytes[2:-2] + tile_content[2:]
-
     return tile_content
