@@ -1,4 +1,5 @@
 import enum
+from io import IOBase
 import typing
 from dataclasses import dataclass
 
@@ -109,7 +110,7 @@ class Tag:
     name: typing.ClassVar[str]
     type: TagType
     count: int
-    value: typing.Any
+    value: typing.Tuple[typing.Any]
 
 
 @dataclass
@@ -125,3 +126,4 @@ class Cog:
 
     header: Header
     ifds: typing.List[IFD]
+    file_handle: IOBase
