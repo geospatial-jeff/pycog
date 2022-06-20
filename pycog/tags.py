@@ -5,6 +5,17 @@ from pycog.types import Tag
 
 
 @dataclass
+class NewSubfileType(Tag):
+    """A general indication of the kind of data contained in this IFD.
+    https://www.awaresystems.be/imaging/tiff/tifftags/newsubfiletype.html
+    """
+
+    id: typing.ClassVar[int] = 254
+    name: typing.ClassVar[str] = "NewSubfileType"
+    value: bytes
+
+
+@dataclass
 class ImageWidth(Tag):
     """The number of columns (width) in the image.
     https://www.awaresystems.be/imaging/tiff/tifftags/imagewidth.html
@@ -218,6 +229,7 @@ class TagRegistry:
 
     def register_baseline(self):
         self.add(
+            NewSubfileType,
             ImageWidth,
             ImageHeight,
             BitsPerSample,
