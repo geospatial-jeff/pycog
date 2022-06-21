@@ -26,6 +26,23 @@ def write_cog(cog: Cog) -> bytes:
     header_size = 8
     cog.header.first_ifd_offset = header_size
 
+    # Calculate the offset at which we will start storing image data (tiles).
+    # This is after all IFDs and their tags.
+    # TODO: optimize this (only recurse once).
+    tile_offset = 0
+    tile_offset += header_size
+    for ifd in cog.ifds:
+        # Tag count
+        tile_offset += 2
+        for tag in ifd.tags.values():
+            # Tag
+            tile_offset += 12
+            if tag.size > 4:
+                # Large tag values
+                tile_offset += tag.size
+        # IFD offset
+        tile_offset += 4
+
     # Write the header (first 8 bytes).
     cog_segments = [
         write_header(cog.header)
@@ -95,5 +112,8 @@ def write_cog(cog: Cog) -> bytes:
 
         # Write the IFD to the COG
         cog_segments += ifd_segments
+
+    # SANITY CHECK
+    assert sum(map(len, cog_segments)) == tile_offset
 
     return b"".join(cog_segments)
