@@ -1,9 +1,6 @@
-from io import IOBase
 import struct
-import typing
-from collections import deque
 
-from pycog.types import IFD, Cog, Endian, Header, Tag
+from pycog.types import Cog, Endian, Header
 
 _ENDIAN_BYTES_REVERSE = {Endian.big: b"MM", Endian.little: b"II"}
 
@@ -75,7 +72,7 @@ def write_cog(cog: Cog) -> bytes:
 
             # Write tag to the IFD.
             tag_segments = [tag_code, tag_type, tag_count, tag_value]
-            ifd_segments += [tag_code, tag_type, tag_count, tag_value]
+            ifd_segments += tag_segments
 
             # SANITY CHECK
             assert sum(map(len, tag_segments)) == 12
