@@ -1,6 +1,7 @@
 import struct
 
 from pycog.types import Cog, Endian, Header
+from pycog.reader import read_tile
 
 _ENDIAN_BYTES_REVERSE = {Endian.big: b"MM", Endian.little: b"II"}
 
@@ -115,5 +116,14 @@ def write_cog(cog: Cog) -> bytes:
 
     # SANITY CHECK
     assert sum(map(len, cog_segments)) == tile_offset
+
+    # Write image data.
+    image_segments = []
+    for ifd in cog.ifds:
+        for (tile_offset, tile_length) in zip(ifd.tags['TileOffsets'].value, ifd.tags['TileByteCounts'].value):
+            cog.file_handle.seek(tile_offset)
+            content = cog.file_handle.read(tile_length)
+            image_segments.append(content)
+    cog_segments += image_segments
 
     return b"".join(cog_segments)
