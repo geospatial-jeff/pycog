@@ -82,8 +82,18 @@ TAG_TYPES = {
 }
 
 
+class MetaTag(type):
+    """Dynamically set `Tag.name` class attribute."""
+
+    def __new__(cls, name: str, bases: typing.Tuple, attrs: typing.Dict) -> "MetaTag":
+        _cls = super().__new__(cls, name, bases, attrs)
+        # Set `Tag.name` to name of the class.
+        _cls.name = name
+        return _cls
+
+
 @dataclass
-class Tag:
+class Tag(metaclass=MetaTag):
     """A TIFF Tag.
 
     Tags are named key/value pairs which contain metadata about the underlying image data.  They are grouped into:

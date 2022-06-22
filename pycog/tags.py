@@ -11,7 +11,6 @@ class NewSubfileType(Tag):
     """
 
     id: typing.ClassVar[int] = 254
-    name: typing.ClassVar[str] = "NewSubfileType"
     value: bytes
 
 
@@ -22,7 +21,6 @@ class ImageWidth(Tag):
     """
 
     id: typing.ClassVar[int] = 256
-    name: typing.ClassVar[str] = "ImageWidth"
     value: bytes
 
 
@@ -33,7 +31,6 @@ class ImageHeight(Tag):
     """
 
     id: typing.ClassVar[int] = 257
-    name: typing.ClassVar[str] = "ImageHeight"
     value: bytes
 
 
@@ -44,7 +41,6 @@ class BitsPerSample(Tag):
     """
 
     id: typing.ClassVar[int] = 258
-    name: typing.ClassVar[str] = "BitsPerSample"
     value: bytes
 
 
@@ -55,7 +51,6 @@ class Compression(Tag):
     """
 
     id: typing.ClassVar[int] = 259
-    name: typing.ClassVar[str] = "Compression"
     value: bytes
 
 
@@ -66,7 +61,6 @@ class PhotometricInterpretation(Tag):
     """
 
     id: typing.ClassVar[int] = 262
-    name: typing.ClassVar[str] = "PhotometricInterpretation"
     value: bytes
 
 
@@ -77,7 +71,6 @@ class SamplesPerPixel(Tag):
     """
 
     id: typing.ClassVar[int] = 277
-    name: typing.ClassVar[str] = "SamplesPerPixel"
     value: bytes
 
 
@@ -88,7 +81,6 @@ class XResolution(Tag):
     """
 
     id: typing.ClassVar[int] = 282
-    name: typing.ClassVar[str] = "XResolution"
     value: bytes
 
 
@@ -99,7 +91,6 @@ class YResolution(Tag):
     """
 
     id: typing.ClassVar[int] = 283
-    name: typing.ClassVar[str] = "YResolution"
     value: bytes
 
 
@@ -110,7 +101,6 @@ class PlanarConfiguration(Tag):
     """
 
     id: typing.ClassVar[int] = 284
-    name: typing.ClassVar[str] = "PlanarConfiguration"
     value: bytes
 
 
@@ -121,7 +111,6 @@ class ResolutionUnit(Tag):
     """
 
     id: typing.ClassVar[int] = 296
-    name: typing.ClassVar[str] = "ResolutionUnit"
     value: bytes
 
 
@@ -132,7 +121,6 @@ class TileWidth(Tag):
     """
 
     id: typing.ClassVar[int] = 322
-    name: typing.ClassVar[str] = "TileWidth"
     value: bytes
 
 
@@ -143,7 +131,6 @@ class TileHeight(Tag):
     """
 
     id: typing.ClassVar[int] = 323
-    name: typing.ClassVar[str] = "TileHeight"
     value: bytes
 
 
@@ -154,7 +141,6 @@ class TileOffsets(Tag):
     """
 
     id: typing.ClassVar[int] = 324
-    name: typing.ClassVar[str] = "TileOffsets"
     value: bytes
 
 
@@ -165,7 +151,6 @@ class TileByteCounts(Tag):
     """
 
     id: typing.ClassVar[int] = 325
-    name: typing.ClassVar[str] = "TileByteCounts"
     value: bytes
 
 
@@ -176,7 +161,6 @@ class ExtraSamples(Tag):
     """
 
     id: typing.ClassVar[int] = 338
-    name: typing.ClassVar[str] = "ExtraSamples"
     value: bytes
 
 
@@ -187,7 +171,6 @@ class SampleFormat(Tag):
     """
 
     id: typing.ClassVar[int] = 339
-    name: typing.ClassVar[str] = "SampleFormat"
     value: bytes
 
 
@@ -198,7 +181,6 @@ class JPEGTables(Tag):
     """
 
     id: typing.ClassVar[int] = 347
-    name: typing.ClassVar[str] = "JPEGTables"
     value: bytes
 
 
