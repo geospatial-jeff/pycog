@@ -24,25 +24,30 @@ def write_cog(cog: Cog) -> bytes:
 
     # Hard code header size to 8; skip GDAL ghost area.
     # https://gdal.org/drivers/raster/cog.html#header-ghost-area
-    header_size = 8
-    cog.header.first_ifd_offset = header_size
+    cog.header.first_ifd_offset = 8
 
-    # Calculate the offset at which we will start storing image data (tiles).
-    # This is after all IFDs and their tags.
-    # TODO: optimize this (only recurse once).
-    tile_offset = 0
-    tile_offset += header_size
-    for ifd in cog.ifds:
-        # Tag count
-        tile_offset += 2
-        for tag in ifd.tags.values():
-            # Tag
-            tile_offset += 12
-            if tag.size > 4:
-                # Large tag values
-                tile_offset += tag.size
-        # IFD offset
-        tile_offset += 4
+
+    # Read image data from the COG.
+    image_segments = []
+    for ifd in cog.ifds[::-1]:
+        for (tile_offset, tile_byte_count) in zip(ifd.tags['TileOffsets'].value, ifd.tags['TileByteCounts'].value):
+            cog.file_handle.seek(tile_offset)
+            content = cog.file_handle.read(tile_byte_count)
+            image_segments.append(content)
+            # SANITY CHECK
+            assert len(content) == tile_byte_count
+
+    # Adjust tile offsets
+    image_data_offset = cog.header_size
+    for ifd in cog.ifds[::-1]:
+        tile_byte_counts = ifd.tags['TileByteCounts'].value
+
+        new_offsets = []
+        for byte_count in tile_byte_counts:
+            new_offsets.append(image_data_offset)
+            image_data_offset += byte_count
+
+        ifd.tags['TileOffsets'].value = tuple(new_offsets)
 
     # Write the header (first 8 bytes).
     cog_segments = [
@@ -115,15 +120,12 @@ def write_cog(cog: Cog) -> bytes:
         cog_segments += ifd_segments
 
     # SANITY CHECK
-    assert sum(map(len, cog_segments)) == tile_offset
+    assert sum(map(len, cog_segments)) == cog.header_size
 
-    # Write image data.
-    image_segments = []
-    for ifd in cog.ifds:
-        for (tile_offset, tile_length) in zip(ifd.tags['TileOffsets'].value, ifd.tags['TileByteCounts'].value):
-            cog.file_handle.seek(tile_offset)
-            content = cog.file_handle.read(tile_length)
-            image_segments.append(content)
+    # Write image data
     cog_segments += image_segments
+
+    # SANITY CHECK
+    assert sum(map(len, cog_segments)) == image_data_offset
 
     return b"".join(cog_segments)

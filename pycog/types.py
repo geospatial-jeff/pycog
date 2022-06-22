@@ -129,3 +129,27 @@ class Cog:
     header: Header
     ifds: typing.List[IFD]
     file_handle: IOBase
+
+    @property
+    def header_size(self) -> int:
+        """Returns the size of the COG header in bytes.
+
+        This includes all IFDs (everything except image data), and assumes
+        that the header is only 8 bytes.
+        """
+        size = 0
+        # Header
+        size += 8
+        for ifd in self.ifds:
+            # Tag count
+            size += 2
+            for tag in ifd.tags.values():
+                # Tag
+                size += 12
+                if tag.size > 4:
+                    size += tag.size
+            # IFD offset
+            size += 4
+        return size
+
+

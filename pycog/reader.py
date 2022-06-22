@@ -83,6 +83,7 @@ def open_cog(file_handle: IOBase, header_size: int = 65536) -> Cog:
         next_ifd_offset = int.from_bytes(
             b[tag_start + 12 : tag_start + 12 + 4], header.endian.name
         )
+        print(next_ifd_offset)
         ifds.append(
             IFD(tag_count=tag_count, next_ifd_offset=next_ifd_offset, tags=tags)
         )
