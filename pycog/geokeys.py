@@ -18,6 +18,14 @@ class GeoKey(metaclass=MetaTag):
 class GTModelType(GeoKey):
     id: typing.ClassVar[int] = 1024
 
+    class GTModelTypeEnum(IntEnum):
+        Projected = 1
+        Geographic = 2
+        Geocentric = 3
+
+    def __post_init__(self):
+        self.parsed_value = self.GTModelTypeEnum(self.value_offset)
+
 
 @dataclass
 class GTRasterType(GeoKey):
@@ -28,7 +36,6 @@ class GTRasterType(GeoKey):
         RasterPixelIsPoint = 2
 
     def __post_init__(self):
-        # TODO: This pattern will break when a geokey references another TIFF tag
         self.parsed_value = self.GTRasterTypeEnum(self.value_offset)
 
 
@@ -72,6 +79,19 @@ class GeographicLinearUnitSize(GeoKey):
 class GeographicAngularUnits(GeoKey):
     id: typing.ClassVar[int] = 2054
 
+    class GeographicAngularUnitsEnum(IntEnum):
+        Radian = 9101
+        Degree = 9102
+        ArcMinute = 9103
+        ArcSecond = 9104
+        Grad = 9105
+        Gon = 9106
+        DMS = 9107
+        DMSHemisphere = 9108
+
+    def __post_init__(self):
+        self.parsed_value = self.GeographicAngularUnitsEnum(self.value_offset)
+
 
 @dataclass
 class GeographicAngularUnitSize(GeoKey):
@@ -107,10 +127,35 @@ class GeographicAzimuthUnits(GeoKey):
 class ProjectedType(GeoKey):
     id: typing.ClassVar[int] = 3072
 
+    def __post_init__(self):
+        # This contains EPSG code, for now we will just leave as is.
+        self.parsed_value = self.value_offset
+
 
 @dataclass
 class ProjectedLinearUnits(GeoKey):
+
+    class ProjectedLinearUnitsEnum(IntEnum):
+        Meter = 9001
+        Foot = 9002
+        FootUSSurvey = 9003
+        FootModifiedAmerican = 9004
+        FootClarke = 9005
+        FootIndian = 9006
+        Link = 9007
+        LinkBenoit = 9008
+        LinkSears = 9009
+        ChainBenoit = 9010
+        ChainSears = 9011
+        YardSears = 9012
+        YardIndian = 9013
+        LinearFathom = 9014
+        LinearMileInternationalNautical = 9015
+
     id: typing.ClassVar[int] = 3076
+
+    def __post_init__(self):
+        self.parsed_value = self.ProjectedLinearUnitsEnum(self.value_offset)
 
 
 @dataclass

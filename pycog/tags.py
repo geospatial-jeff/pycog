@@ -251,7 +251,10 @@ class GeoKeyDirectory(Tag):
                     value_offset=value_offset
                 )
             )
-        print(parsed_geokeys)
+        print("\n---PARSED GEOKEYS---")
+        for key in parsed_geokeys:
+            print(key)
+        print("\n")
 
 
 
