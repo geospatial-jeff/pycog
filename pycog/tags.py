@@ -185,6 +185,44 @@ class JPEGTables(Tag):
 
 
 @dataclass
+class ModelPixelScale(Tag):
+    """Defines affine transformations between raster and model space.
+    https://www.awaresystems.be/imaging/tiff/tifftags/modelpixelscaletag.html
+    """
+
+    id: typing.ClassVar[int] = 33550
+    value: bytes
+
+
+@dataclass
+class ModelTiePoint(Tag):
+    """Stores raster -> model tiepoints.
+    https://www.awaresystems.be/imaging/tiff/tifftags/modeltiepointtag.html
+    """
+
+    id: typing.ClassVar[int] = 33922
+    value: bytes
+
+
+@dataclass
+class GeoKeyDirectory(Tag):
+    """GeoKeyDirectory, stores geo keys and stuff?"""
+
+    id: typing.ClassVar[int] = 34735
+    value: bytes
+
+
+@dataclass
+class GeoAsciiParams(Tag):
+    """Stores ASCII valued GeoKeys referenced by the GeoKeyDirectory tag.
+    https://www.awaresystems.be/imaging/tiff/tifftags/geoasciiparamstag.html
+    """
+
+    id: typing.ClassVar[int] = 34737
+    value: bytes
+
+
+@dataclass
 class TagRegistry:
     """Defines which tags are read when opening an image.
     Allows for the inclusion of additional TIFF tags (ex. private tags).
@@ -229,6 +267,14 @@ class TagRegistry:
             ExtraSamples,
             SampleFormat,
             JPEGTables,
+        )
+
+    def register_geotiff(self):
+        self.add(
+            ModelPixelScale,
+            ModelTiePoint,
+            GeoKeyDirectory,
+            GeoAsciiParams
         )
 
 

@@ -48,7 +48,9 @@ def open_cog(file_handle: IOBase, header_size: int = 65536) -> Cog:
             # First 2 bytes contain tag code.
             tag_code = int.from_bytes(b[tag_start : tag_start + 2], header.endian.name)
             tag_cls = tag_registry.get(tag_code)
+
             if not tag_cls:
+                print("Skipping tag: ", tag_code)
                 continue
 
             # Bytes 2-4 contain the tag's field type.
