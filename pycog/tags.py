@@ -2,6 +2,7 @@ import typing
 from dataclasses import dataclass, field
 
 from pycog.types import Tag
+from pycog.geokeys import geokey_registry
 
 
 @dataclass
@@ -210,6 +211,48 @@ class GeoKeyDirectory(Tag):
 
     id: typing.ClassVar[int] = 34735
     value: bytes
+
+    # Not convinced this is the best place for htis logic..
+    def __post_init__(self):
+        # GeoKeyDirectory is a "meta tag" which itself contains other tags.
+        # This is to avoid polluting TIFF tag space with a lot of CRS related tags.
+        # And avoids having to use a private IFD to store this data.
+        # The directory is an array of unsigned SHORT values, grouped into blocks of 4.
+        geokeys = [self.value[i:i + 4] for i in range(0, len(self.value), 4)]
+
+        # The first chunk is the directory header, and contains metadata about the directory.
+        # In this order {KeyDirectoryVersion, KeyRevision, MinorRevision, NumberOfKeys}.
+        _, _, _, number_of_keys = geokeys.pop(0)
+        assert number_of_keys == len(geokeys)
+
+        # The rest of the directory are the geokeys themselves {KeyID, TiffTagLocation, Count, ValueOffset}
+        #   KeyID - the ID of the geokey, equivalent to TIFF tag ids but use a different tag space.
+        #   TiffTagLocation - indicates which TIFF tag contains the value(s) of the key.  If this is set to 0
+        #                     the value is SHORT and contained within the ValueOffset part of the geokey.
+        #                     Otherwise the type is implied by the data type of the referenced TIFF tag.  This
+        #                     may recursively reference the GeoKeyDirectory tag.
+        #   Count - indicates the number of values in the key.
+        #   ValueOffset - indicates either the tag value itself or the offset into the tag where the value
+        #                 is stored, depending on the value of TiffTagLocation.  Note this is NOT a byte
+        #                 offset like baseline TIFF tags, but instead an index based on the natural data type
+        #                 of the specified tag.
+        parsed_geokeys = []
+        for geokey in geokeys:
+            key_id, tag_location, count, value_offset = geokey
+            geokey_cls = geokey_registry.get(key_id)
+            if tag_location != 0:
+                # TODO: Link the geokey to the appropriate TIFF tag somehow.
+                print("Skipping geokey: ", geokey_cls, key_id, tag_location, count, value_offset)
+                continue
+            parsed_geokeys.append(
+                geokey_cls(
+                    tag_location=tag_location,
+                    count=count,
+                    value_offset=value_offset
+                )
+            )
+        print(parsed_geokeys)
+
 
 
 @dataclass
