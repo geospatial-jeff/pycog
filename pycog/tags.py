@@ -224,7 +224,7 @@ class GeoKeyDirectory(GeotiffTag):
     geokeys: typing.Dict[str, GeoKey] = field(default_factory=dict)
 
     # Not convinced this is the best place for this logic..
-    def parse(self, tags: typing.Sequence[Tag]):
+    def parse_from_tags(self, tags: typing.Sequence[Tag]):
         # GeoKeyDirectory is a "meta tag" which itself contains other tags.
         # This is to avoid polluting TIFF tag space with a lot of CRS related tags.
         # And avoids having to use a private IFD to store this data.

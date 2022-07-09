@@ -85,7 +85,8 @@ def open_cog(file_handle: IOBase, header_size: int = 65536) -> Cog:
         # The GeoKeyDirectory tag references information stored in other tiff tags.
         # Parse it after reading all tags.
         try:
-            tags['GeoKeyDirectory'].parse(tags)
+            gkd: GeoKeyDirectory = tags['GeoKeyDirectory']
+            gkd.parse_from_tags(tags)
         except KeyError:
             pass
 
