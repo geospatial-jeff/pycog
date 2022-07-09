@@ -1,12 +1,12 @@
 import typing
 from dataclasses import dataclass, field
 
-from pycog.types import Tag
+from pycog.types import Tag, BaselineTag, GeotiffTag
 from pycog.geokeys import geokey_registry
 
 
 @dataclass
-class NewSubfileType(Tag):
+class NewSubfileType(BaselineTag):
     """A general indication of the kind of data contained in this IFD.
     https://www.awaresystems.be/imaging/tiff/tifftags/newsubfiletype.html
     """
@@ -16,7 +16,7 @@ class NewSubfileType(Tag):
 
 
 @dataclass
-class ImageWidth(Tag):
+class ImageWidth(BaselineTag):
     """The number of columns (width) in the image.
     https://www.awaresystems.be/imaging/tiff/tifftags/imagewidth.html
     """
@@ -26,7 +26,7 @@ class ImageWidth(Tag):
 
 
 @dataclass
-class ImageHeight(Tag):
+class ImageHeight(BaselineTag):
     """The number of rows (height) in the image.
     https://www.awaresystems.be/imaging/tiff/tifftags/imagelength.html
     """
@@ -36,7 +36,7 @@ class ImageHeight(Tag):
 
 
 @dataclass
-class BitsPerSample(Tag):
+class BitsPerSample(BaselineTag):
     """The number of bits per component.
     https://www.awaresystems.be/imaging/tiff/tifftags/bitspersample.html
     """
@@ -46,7 +46,7 @@ class BitsPerSample(Tag):
 
 
 @dataclass
-class Compression(Tag):
+class Compression(BaselineTag):
     """Compression scheme used on the image data.
     https://www.awaresystems.be/imaging/tiff/tifftags/compression.html
     """
@@ -56,7 +56,7 @@ class Compression(Tag):
 
 
 @dataclass
-class PhotometricInterpretation(Tag):
+class PhotometricInterpretation(BaselineTag):
     """The color space of the image data.
     https://www.awaresystems.be/imaging/tiff/tifftags/photometricinterpretation.html
     """
@@ -66,7 +66,7 @@ class PhotometricInterpretation(Tag):
 
 
 @dataclass
-class SamplesPerPixel(Tag):
+class SamplesPerPixel(BaselineTag):
     """The number of components per pixel.
     https://www.awaresystems.be/imaging/tiff/tifftags/samplesperpixel.html
     """
@@ -76,7 +76,7 @@ class SamplesPerPixel(Tag):
 
 
 @dataclass
-class XResolution(Tag):
+class XResolution(BaselineTag):
     """The number of pixels per ResolutionUnit in the ImageWidth direction.
     https://www.awaresystems.be/imaging/tiff/tifftags/xresolution.html
     """
@@ -86,7 +86,7 @@ class XResolution(Tag):
 
 
 @dataclass
-class YResolution(Tag):
+class YResolution(BaselineTag):
     """The number of pixels per ResolutionUnit in the ImageHeight direction.
     https://www.awaresystems.be/imaging/tiff/tifftags/yresolution.html
     """
@@ -96,7 +96,7 @@ class YResolution(Tag):
 
 
 @dataclass
-class PlanarConfiguration(Tag):
+class PlanarConfiguration(BaselineTag):
     """How the components of each pixel are stored (chunky or planar).
     https://www.awaresystems.be/imaging/tiff/tifftags/planarconfiguration.html
     """
@@ -106,7 +106,7 @@ class PlanarConfiguration(Tag):
 
 
 @dataclass
-class ResolutionUnit(Tag):
+class ResolutionUnit(BaselineTag):
     """The unit of measurement for XResolution and YResolution.
     https://www.awaresystems.be/imaging/tiff/tifftags/resolutionunit.html
     """
@@ -116,7 +116,7 @@ class ResolutionUnit(Tag):
 
 
 @dataclass
-class TileWidth(Tag):
+class TileWidth(BaselineTag):
     """TThe tile width in pixels, or the number of columns in each tile.
     https://www.awaresystems.be/imaging/tiff/tifftags/tilewidth.html
     """
@@ -126,7 +126,7 @@ class TileWidth(Tag):
 
 
 @dataclass
-class TileHeight(Tag):
+class TileHeight(BaselineTag):
     """TThe tile height in pixels, or the number of rows in each tile.
     https://www.awaresystems.be/imaging/tiff/tifftags/tileheight.html
     """
@@ -136,7 +136,7 @@ class TileHeight(Tag):
 
 
 @dataclass
-class TileOffsets(Tag):
+class TileOffsets(BaselineTag):
     """The byte offset to each compressed image tile.
     https://www.awaresystems.be/imaging/tiff/tifftags/tileoffsets.html
     """
@@ -146,7 +146,7 @@ class TileOffsets(Tag):
 
 
 @dataclass
-class TileByteCounts(Tag):
+class TileByteCounts(BaselineTag):
     """The number of bytes in each compressed image tile.
     https://www.awaresystems.be/imaging/tiff/tifftags/tilebytecounts.html
     """
@@ -156,7 +156,7 @@ class TileByteCounts(Tag):
 
 
 @dataclass
-class ExtraSamples(Tag):
+class ExtraSamples(BaselineTag):
     """Description of extra components, usually used to determine how to handle a potential alpha channel.
     https://www.awaresystems.be/imaging/tiff/tifftags/extrasamples.html
     """
@@ -166,7 +166,7 @@ class ExtraSamples(Tag):
 
 
 @dataclass
-class SampleFormat(Tag):
+class SampleFormat(BaselineTag):
     """Specifies how to interpret each data sample in a pixel.
     https://www.awaresystems.be/imaging/tiff/tifftags/sampleformat.html
     """
@@ -176,7 +176,7 @@ class SampleFormat(Tag):
 
 
 @dataclass
-class JPEGTables(Tag):
+class JPEGTables(BaselineTag):
     """JPEG quanitization and/or Huffman tables when image data is JPEG compressed.
     https://www.awaresystems.be/imaging/tiff/tifftags/jpegtables.html
     """
@@ -186,7 +186,7 @@ class JPEGTables(Tag):
 
 
 @dataclass
-class ModelPixelScale(Tag):
+class ModelPixelScale(GeotiffTag):
     """Defines affine transformations between raster and model space.
     https://www.awaresystems.be/imaging/tiff/tifftags/modelpixelscaletag.html
     """
@@ -196,7 +196,7 @@ class ModelPixelScale(Tag):
 
 
 @dataclass
-class ModelTiePoint(Tag):
+class ModelTiePoint(GeotiffTag):
     """Stores raster -> model tiepoints.
     https://www.awaresystems.be/imaging/tiff/tifftags/modeltiepointtag.html
     """
@@ -206,7 +206,7 @@ class ModelTiePoint(Tag):
 
 
 @dataclass
-class GeoKeyDirectory(Tag):
+class GeoKeyDirectory(GeotiffTag):
     """GeoKeyDirectory, stores geo keys and stuff?"""
 
     id: typing.ClassVar[int] = 34735
@@ -243,6 +243,10 @@ class GeoKeyDirectory(Tag):
             if tag_location != 0:
                 # TODO: Link the geokey to the appropriate TIFF tag somehow.
                 print("Skipping geokey: ", geokey_cls, key_id, tag_location, count, value_offset)
+
+                tiff_tag = tag_registry.get(tag_location)
+                print("TAG: ", tiff_tag)
+
                 continue
             parsed_geokeys.append(
                 geokey_cls(
@@ -259,7 +263,7 @@ class GeoKeyDirectory(Tag):
 
 
 @dataclass
-class GeoAsciiParams(Tag):
+class GeoAsciiParams(GeotiffTag):
     """Stores ASCII valued GeoKeys referenced by the GeoKeyDirectory tag.
     https://www.awaresystems.be/imaging/tiff/tifftags/geoasciiparamstag.html
     """
@@ -294,34 +298,10 @@ class TagRegistry:
         return self.tags.get(tag_code)
 
     def register_baseline(self):
-        self.add(
-            NewSubfileType,
-            ImageWidth,
-            ImageHeight,
-            BitsPerSample,
-            Compression,
-            PhotometricInterpretation,
-            SamplesPerPixel,
-            XResolution,
-            YResolution,
-            PlanarConfiguration,
-            ResolutionUnit,
-            TileWidth,
-            TileHeight,
-            TileOffsets,
-            TileByteCounts,
-            ExtraSamples,
-            SampleFormat,
-            JPEGTables,
-        )
+        self.add(*BaselineTag.__subclasses__())
 
     def register_geotiff(self):
-        self.add(
-            ModelPixelScale,
-            ModelTiePoint,
-            GeoKeyDirectory,
-            GeoAsciiParams
-        )
+        self.add(*GeotiffTag.__subclasses__())
 
 
 tag_registry = TagRegistry()

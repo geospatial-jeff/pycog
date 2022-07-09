@@ -126,6 +126,16 @@ class Tag(metaclass=MetaTag):
 
 
 @dataclass
+class BaselineTag(Tag):
+    ...
+
+
+@dataclass
+class GeotiffTag(Tag):
+    ...
+
+
+@dataclass
 class Cog:
     """A Cloud Optimized GeoTiff (COG).
 
