@@ -116,6 +116,16 @@ class ResolutionUnit(BaselineTag):
 
 
 @dataclass
+class Predictor(BaselineTag):
+    """A mathematical operator applied to the image data before an encoding scheme is applied.
+    https://www.awaresystems.be/imaging/tiff/tifftags/predictor.html
+    """
+
+    id: typing.ClassVar[int] = 317
+    value: bytes
+
+
+@dataclass
 class TileWidth(BaselineTag):
     """TThe tile width in pixels, or the number of columns in each tile.
     https://www.awaresystems.be/imaging/tiff/tifftags/tilewidth.html
