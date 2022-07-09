@@ -1,7 +1,9 @@
 import math
+import numpy as np
 from io import IOBase
 import struct
 
+from pycog.codecs import codec_registry
 from pycog.tags import tag_registry
 from pycog.types import IFD, TAG_TYPES, Cog, Endian, Header, TiffVersion
 
@@ -102,7 +104,7 @@ def open_cog(file_handle: IOBase, header_size: int = 65536) -> Cog:
     return Cog(header=header, ifds=ifds, file_handle=file_handle)
 
 
-def read_tile(x: int, y: int, z: int, cog: Cog) -> bytes:
+def read_tile(x: int, y: int, z: int, cog: Cog, decode: bool = True) -> bytes | np.ndarray:
     # Calculate number of columns in the IFD.
     ifd = cog.ifds[z]
     image_width = ifd.tags["ImageWidth"].value[0]
@@ -117,4 +119,14 @@ def read_tile(x: int, y: int, z: int, cog: Cog) -> bytes:
     # Read the tile.
     cog.file_handle.seek(tile_offset)
     tile_content = cog.file_handle.read(tile_byte_count)
+
+    # Decode the tile if enabled.
+    # This type divergence is weird.
+    if decode:
+        compression = ifd.tags['Compression'].value[0]
+        codec = codec_registry.get(compression)
+        if not codec:
+            raise NotImplementedError(f"Compression {compression} is not supported.")
+        tile_content = codec.decode(tile_content, ifd, cog.header.endian)
+
     return tile_content
