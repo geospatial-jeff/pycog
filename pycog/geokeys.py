@@ -50,9 +50,9 @@ class GTCitation(GeoKey):
 
 
 
-@dataclass
-class GeographicType(GeoKey):
-    id: typing.ClassVar[int] = 2048
+# @dataclass
+# class GeographicType(GeoKey):
+#     id: typing.ClassVar[int] = 2048
 
 
 @dataclass
@@ -64,24 +64,24 @@ class GeographicCitation(GeoKey):
         self.parsed_value = b"".join(self.value_offset[:-1]).decode('ascii')
 
 
-@dataclass
-class GeographicGeodeticDatum(GeoKey):
-    id: typing.ClassVar[int] = 2050
+# @dataclass
+# class GeographicGeodeticDatum(GeoKey):
+#     id: typing.ClassVar[int] = 2050
 
 
-@dataclass
-class GeographicPrimeMeridian(GeoKey):
-    id: typing.ClassVar[int] = 2051
+# @dataclass
+# class GeographicPrimeMeridian(GeoKey):
+#     id: typing.ClassVar[int] = 2051
 
 
-@dataclass
-class GeographicLinearUnits(GeoKey):
-    id: typing.ClassVar[int] = 2052
+# @dataclass
+# class GeographicLinearUnits(GeoKey):
+#     id: typing.ClassVar[int] = 2052
 
 
-@dataclass
-class GeographicLinearUnitSize(GeoKey):
-    id: typing.ClassVar[int] = 2053
+# @dataclass
+# class GeographicLinearUnitSize(GeoKey):
+#     id: typing.ClassVar[int] = 2053
 
 
 @dataclass
@@ -102,34 +102,34 @@ class GeographicAngularUnits(GeoKey):
         self.parsed_value = self.GeographicAngularUnitsEnum(self.value_offset)
 
 
-@dataclass
-class GeographicAngularUnitSize(GeoKey):
-    id: typing.ClassVar[int] = 2055
+# @dataclass
+# class GeographicAngularUnitSize(GeoKey):
+#     id: typing.ClassVar[int] = 2055
 
 
-@dataclass
-class GeographicEllipsoid(GeoKey):
-    id: typing.ClassVar[int] = 2056
+# @dataclass
+# class GeographicEllipsoid(GeoKey):
+#     id: typing.ClassVar[int] = 2056
 
 
-@dataclass
-class GeographicSemiMajorAxis(GeoKey):
-    id: typing.ClassVar[int] = 2057
+# @dataclass
+# class GeographicSemiMajorAxis(GeoKey):
+#     id: typing.ClassVar[int] = 2057
 
 
-@dataclass
-class GeographicSemiMinorAxis(GeoKey):
-    id: typing.ClassVar[int] = 2058
+# @dataclass
+# class GeographicSemiMinorAxis(GeoKey):
+#     id: typing.ClassVar[int] = 2058
 
 
-@dataclass
-class GeographicInvFlattening(GeoKey):
-    id: typing.ClassVar[int] = 2059
+# @dataclass
+# class GeographicInvFlattening(GeoKey):
+#     id: typing.ClassVar[int] = 2059
 
 
-@dataclass
-class GeographicAzimuthUnits(GeoKey):
-    id: typing.ClassVar[int] = 2060
+# @dataclass
+# class GeographicAzimuthUnits(GeoKey):
+#     id: typing.ClassVar[int] = 2060
 
 
 @dataclass
@@ -177,26 +177,7 @@ class GeoKeyRegistry:
     def __post_init__(self):
         # Messing with GeoKeys is probably something most users won't do.
         # So it seems reasonable to register them all on import.
-        self.add(
-            GTModelType,
-            GTRasterType,
-            GTCitation,
-            GeographicType,
-            GeographicCitation,
-            GeographicGeodeticDatum,
-            GeographicPrimeMeridian,
-            GeographicLinearUnits,
-            GeographicLinearUnitSize,
-            GeographicAngularUnits,
-            GeographicAngularUnitSize,
-            GeographicEllipsoid,
-            GeographicSemiMajorAxis,
-            GeographicSemiMinorAxis,
-            GeographicInvFlattening,
-            GeographicAzimuthUnits,
-            ProjectedType,
-            ProjectedLinearUnits,
-        )
+        self.add(*GeoKey.__subclasses__())
 
     def add(self, *keys: typing.Type[GeoKey]):
         self.tags.update({t.id:t for t in keys})

@@ -50,6 +50,7 @@ def open_cog(file_handle: IOBase, header_size: int = 65536) -> Cog:
             tag_cls = tag_registry.get(tag_code)
 
             if not tag_cls:
+                print("WARNING: Skipping tag: ", tag_code)
                 continue
 
             # Bytes 2-4 contain the tag's field type.
