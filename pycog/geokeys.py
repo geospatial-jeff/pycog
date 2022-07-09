@@ -44,6 +44,11 @@ class GTRasterType(GeoKey):
 class GTCitation(GeoKey):
     id: typing.ClassVar[int] = 1026
 
+    def __post_init__(self):
+        # Ascii tag, strip null character at end ("|")
+        self.parsed_value = b"".join(self.value_offset[:-1]).decode('ascii')
+
+
 
 @dataclass
 class GeographicType(GeoKey):
@@ -53,6 +58,10 @@ class GeographicType(GeoKey):
 @dataclass
 class GeographicCitation(GeoKey):
     id: typing.ClassVar[int] = 2049
+
+    def __post_init__(self):
+        # Ascii tag, strip null character at end ("|")
+        self.parsed_value = b"".join(self.value_offset[:-1]).decode('ascii')
 
 
 @dataclass

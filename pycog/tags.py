@@ -213,7 +213,7 @@ class GeoKeyDirectory(GeotiffTag):
     value: bytes
 
     # Not convinced this is the best place for htis logic..
-    def __post_init__(self):
+    def parse(self, tags: typing.Sequence[Tag]):
         # GeoKeyDirectory is a "meta tag" which itself contains other tags.
         # This is to avoid polluting TIFF tag space with a lot of CRS related tags.
         # And avoids having to use a private IFD to store this data.
@@ -244,17 +244,25 @@ class GeoKeyDirectory(GeotiffTag):
                 # TODO: Link the geokey to the appropriate TIFF tag somehow.
                 print("Skipping geokey: ", geokey_cls, key_id, tag_location, count, value_offset)
 
-                tiff_tag = tag_registry.get(tag_location)
-                print("TAG: ", tiff_tag)
+                # Find the tiff tag that contains the value of this geokey.
+                tiff_tag = tags[tag_registry.get(tag_location).name]
 
-                continue
-            parsed_geokeys.append(
-                geokey_cls(
-                    tag_location=tag_location,
-                    count=count,
-                    value_offset=value_offset
+                # Extract geokey value from the tiff tag.
+                parsed_geokeys.append(
+                    geokey_cls(
+                        tag_location=tag_location,
+                        count=count,
+                        value_offset=tiff_tag.value[value_offset:value_offset+count]
+                    )
                 )
-            )
+            else:
+                parsed_geokeys.append(
+                    geokey_cls(
+                        tag_location=tag_location,
+                        count=count,
+                        value_offset=value_offset
+                    )
+                )
         print("\n---PARSED GEOKEYS---")
         for key in parsed_geokeys:
             print(key)

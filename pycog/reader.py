@@ -80,6 +80,15 @@ def open_cog(file_handle: IOBase, header_size: int = 65536) -> Cog:
             tag = tag_cls(count=count, type=tag_type, size=size, value=decoded_tag_value)
             tags[tag.name] = tag
 
+
+        # The GeoKeyDirectory tag references information stored in other tiff tags.
+        # Parse it after reading all tags.
+        try:
+            tags['GeoKeyDirectory'].parse(tags)
+        except KeyError:
+            pass
+
+
         # Last 4 bytes of IFD contains offset to the next IFD.
         next_ifd_offset = int.from_bytes(
             b[tag_start + 12 : tag_start + 12 + 4], header.endian.name
