@@ -25,6 +25,11 @@ class Codec(abc.ABC):
         ...
     
     @abc.abstractmethod
+    def encode(self, arr: np.ndarray) -> bytes:
+        """Encode numpy array to bytes."""
+        ...
+    
+    @abc.abstractmethod
     def create_tags(self) -> typing.Dict[int, Tag]:
         """Create compression-specific tiff tags."""
         ...
@@ -48,7 +53,6 @@ class Jpeg(Codec):
             # TODO: Photometric
         }
 
-
     def decode(self, b: bytes, ifd: IFD, endian: Endian) -> np.ndarray:
         """Decode bytes into a numpy array."""
         jpeg_tables = ifd.tags['JPEGTables']
@@ -62,6 +66,7 @@ class Jpeg(Codec):
         return codec.decode(b)
     
     def encode(self, arr: np.ndarray) -> bytes:
+        """Encode numpy array to bytes."""
         return self.numcodec().encode(arr)
 
 
@@ -85,6 +90,10 @@ class Deflate(Codec):
         
         return arr
     
+    def encode(self, arr: np.ndarray) -> bytes:
+        """Encode numpy array to bytes."""
+        ...
+
     def create_tags(self) -> typing.Dict[int, Tag]:
         """Create compression-specific tiff tags."""
         ...
