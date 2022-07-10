@@ -217,6 +217,27 @@ class JPEGTables(BaselineTag):
 
 
 @dataclass
+class YCbCrSubSampling(BaselineTag):
+    """Specifices subsampling factors for JPEG/YCbCr images.
+    https://www.awaresystems.be/imaging/tiff/tifftags/ycbcrsubsampling.html
+    """
+
+    id: typing.ClassVar[int] = 530
+    value: bytes
+
+
+@dataclass
+class ReferenceBlackWhite(BaselineTag):
+    """Specifices a pair of headroom and footroom image data values for each pixel component.
+    https://www.awaresystems.be/imaging/tiff/tifftags/referenceblackwhite.html
+    """
+
+    id: typing.ClassVar[int] = 532
+    value: bytes
+
+
+
+@dataclass
 class ModelPixelScale(GeotiffTag):
     """Defines affine transformations between raster and model space.
     https://www.awaresystems.be/imaging/tiff/tifftags/modelpixelscaletag.html
@@ -295,6 +316,17 @@ class GeoAsciiParams(GeotiffTag):
     """
 
     id: typing.ClassVar[int] = 34737
+    value: bytes
+
+
+# TODO: Technically not a geotiff tag
+@dataclass
+class GdalMetadata(GeotiffTag):
+    """Holds a XML list of key/value pairs containing metadata saved by GDAL.
+    https://www.awaresystems.be/imaging/tiff/tifftags/gdal_metadata.html
+    """
+
+    id: typing.ClassVar[int] = 42112
     value: bytes
 
 
