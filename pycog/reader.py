@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import math
 import numpy as np
 from io import IOBase
@@ -42,7 +43,7 @@ def open_cog(file_handle: IOBase, header_size: int = 65536) -> Cog:
         )
 
         # Read each tag.
-        tags = {}
+        tags = OrderedDict()
         for idx in range(tag_count):
             # Tags are always 12 bytes each.
             tag_start = next_ifd_offset + 2 + (12 * idx)
@@ -82,7 +83,6 @@ def open_cog(file_handle: IOBase, header_size: int = 65536) -> Cog:
             )
             tag = tag_cls(count=count, type=tag_type, size=size, value=decoded_tag_value)
             tags[tag.name] = tag
-
 
         # The GeoKeyDirectory tag references information stored in other tiff tags.
         # Parse it after reading all tags.
