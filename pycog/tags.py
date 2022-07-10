@@ -66,6 +66,27 @@ class PhotometricInterpretation(BaselineTag):
 
 
 @dataclass
+class ImageDescription(BaselineTag):
+    """A string describing the subject of the image.
+    https://www.awaresystems.be/imaging/tiff/tifftags/imagedescription.html
+    """
+
+    id: typing.ClassVar[int] = 270
+    value: bytes
+
+
+@dataclass
+class Software(BaselineTag):
+    """Name and version number of the software package(s) used to create the image.
+    https://www.awaresystems.be/imaging/tiff/tifftags/software.html
+    """
+
+    id: typing.ClassVar[int] = 305
+    value: bytes
+
+
+
+@dataclass
 class SamplesPerPixel(BaselineTag):
     """The number of components per pixel.
     https://www.awaresystems.be/imaging/tiff/tifftags/samplesperpixel.html
