@@ -36,7 +36,10 @@ class Jpeg(Codec):
         )
         
         codec = self.numcodec(tables=jpeg_table_bytes)
-        return codec.decode(b)    
+        return codec.decode(b)
+    
+    def encode(self, arr: np.ndarray) -> bytes:
+        return self.numcodec().encode(arr)
 
 
 class Deflate(Codec):
@@ -54,7 +57,7 @@ class Deflate(Codec):
         
         # Unpredict
         if ifd.tags['Predictor'].value[0] == 2:
-            imagecodecs.delta_decode(arr, out=arr, axis=-1)
+            imagecodecs.delta_decode(arr, out=arr, axis=1)
         
         return arr
 
