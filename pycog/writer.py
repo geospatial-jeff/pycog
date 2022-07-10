@@ -1,5 +1,9 @@
+import collections
 import struct
+import typing
 
+from pycog.constants import JPEG_TABLES
+from pycog.codecs import Codec, codec_registry
 from pycog.types import Cog, Endian, Header
 from pycog.reader import read_tile
 
@@ -18,7 +22,7 @@ def write_header(header: Header) -> bytes:
     )
 
 
-def write_cog(cog: Cog) -> bytes:
+def write_cog(cog: Cog, dst_codec: typing.Optional[Codec] = None) -> bytes:
     # TODO: Store image data
     endian = cog.header.endian
 
@@ -30,12 +34,41 @@ def write_cog(cog: Cog) -> bytes:
     # Read image data from the COG.
     image_segments = []
     for ifd in cog.ifds[::-1]:
+        src_codec = codec_registry.get(ifd.tags['Compression'].value[0])
+        dst_codec = dst_codec or src_codec
+
+        # HACKY STUFF
+        tile_byte_counts = []
+        ifd.tags['JPEGTables'] = JPEG_TABLES
+        ifd.tags = collections.OrderedDict(sorted(ifd.tags.items(), key=lambda t: t[1].id))
+        # END OF HACKY STUFF
+
+        # Update compression tag
+        ifd.tags['Compression'].value = (dst_codec.id,)
+
         for (tile_offset, tile_byte_count) in zip(ifd.tags['TileOffsets'].value, ifd.tags['TileByteCounts'].value):
             cog.file_handle.seek(tile_offset)
             content = cog.file_handle.read(tile_byte_count)
-            image_segments.append(content)
-            # SANITY CHECK
-            assert len(content) == tile_byte_count
+
+            # Recompress the data if appropriate
+            if src_codec != dst_codec:
+                # First decompress the data
+                decoded_content = src_codec.decode(content, ifd, cog.header.endian)
+                
+                # Compress
+                encoded_content = dst_codec.encode(decoded_content)
+                image_segments.append(encoded_content)
+                tile_byte_counts.append(len(encoded_content))
+            else:
+                image_segments.append(content)
+                # SANITY CHECK
+                assert len(content) == tile_byte_count
+        
+        # MORE HACKY STUFF
+        if tile_byte_counts:
+            ifd.tags['TileByteCounts'].value = tuple(tile_byte_counts)
+
+
 
     # Adjust tile offsets
     image_data_offset = cog.header_size
