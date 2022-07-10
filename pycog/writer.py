@@ -39,7 +39,9 @@ def write_cog(cog: Cog, dst_codec: typing.Optional[Codec] = None) -> bytes:
 
         # HACKY STUFF
         tile_byte_counts = []
-        ifd.tags['JPEGTables'] = JPEG_TABLES
+        if src_codec != dst_codec:
+            ifd.tags.update(dst_codec.create_tags())
+        
         ifd.tags = collections.OrderedDict(sorted(ifd.tags.items(), key=lambda t: t[1].id))
         # END OF HACKY STUFF
 

@@ -8,7 +8,9 @@ import numcodecs.abc
 import imagecodecs
 import imagecodecs.numcodecs
 
-from pycog.types import IFD, Endian
+from pycog.constants import JPEG_TABLES
+from pycog.types import IFD, Endian,TagType, TAG_TYPES
+from pycog.tags import Tag, Compression
 from pycog.constants import SAMPLE_DTYPES
 
 
@@ -19,6 +21,12 @@ class Codec(abc.ABC):
 
     @abc.abstractmethod
     def decode(self, b: bytes, ifd: IFD, endian: Endian) -> np.ndarray:
+        """Decode bytes into a numpy array."""
+        ...
+    
+    @abc.abstractmethod
+    def create_tags(self) -> typing.Dict[int, Tag]:
+        """Create compression-specific tiff tags."""
         ...
 
 
@@ -27,7 +35,22 @@ class Jpeg(Codec):
     id: typing.ClassVar[int] = 7
     numcodec: typing.ClassVar[typing.Type[imagecodecs.numcodecs.Jpeg]] = imagecodecs.numcodecs.Jpeg
 
+    def create_tags(self) -> typing.Dict[int, Tag]:
+        """Create compression-specific tiff tags."""
+        return {
+            JPEG_TABLES.id: JPEG_TABLES,
+            Compression.id: Compression(
+                type=TAG_TYPES[3],
+                count=1,
+                size=2,
+                value=(7,)
+            )
+            # TODO: Photometric
+        }
+
+
     def decode(self, b: bytes, ifd: IFD, endian: Endian) -> np.ndarray:
+        """Decode bytes into a numpy array."""
         jpeg_tables = ifd.tags['JPEGTables']
         # TODO: Support photometric/colorspace
         jpeg_table_bytes = struct.pack(
@@ -47,6 +70,7 @@ class Deflate(Codec):
     numcodec: typing.ClassVar[typing.Type[imagecodecs.numcodecs.Deflate]] = imagecodecs.numcodecs.Deflate
 
     def decode(self, b: bytes, ifd: IFD, endian: Endian) -> np.ndarray:
+        """Decode bytes into a numpy array."""
         dtype = np.dtype(
             SAMPLE_DTYPES[(ifd.tags['SampleFormat'].value[0], ifd.tags['BitsPerSample'].value[0])]
         )
@@ -60,6 +84,10 @@ class Deflate(Codec):
             imagecodecs.delta_decode(arr, out=arr, axis=1)
         
         return arr
+    
+    def create_tags(self) -> typing.Dict[int, Tag]:
+        """Create compression-specific tiff tags."""
+        ...
 
 
 @dataclass
