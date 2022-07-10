@@ -3,21 +3,14 @@ from dataclasses import dataclass, field
 import struct
 import typing
 
-from pycog.types import IFD, Endian
-
 import numpy as np
 import numcodecs.abc
-import imagecodecs.numcodecs as imagecodecs
+import imagecodecs
+import imagecodecs.numcodecs
 
+from pycog.types import IFD, Endian
+from pycog.constants import SAMPLE_DTYPES
 
-# @singledispatch
-# def decompress(codec: Codec, ifd: IFD, b: bytes):
-#     ...
-
-
-# @decompress.register
-# def _(codec: Jpeg, ifd: IFD, b: bytes):
-#     jpeg_tables = 
 
 @dataclass
 class Codec(abc.ABC):
@@ -29,11 +22,10 @@ class Codec(abc.ABC):
         ...
 
 
-
 @dataclass
 class Jpeg(Codec):
     id: typing.ClassVar[int] = 7
-    numcodec: typing.ClassVar[typing.Type[imagecodecs.Jpeg]] = imagecodecs.Jpeg
+    numcodec: typing.ClassVar[typing.Type[imagecodecs.numcodecs.Jpeg]] = imagecodecs.numcodecs.Jpeg
 
     def decode(self, b: bytes, ifd: IFD, endian: Endian) -> np.ndarray:
         jpeg_tables = ifd.tags['JPEGTables']
@@ -45,6 +37,26 @@ class Jpeg(Codec):
         
         codec = self.numcodec(tables=jpeg_table_bytes)
         return codec.decode(b)    
+
+
+class Deflate(Codec):
+    id: typing.ClassVar[int] = 8
+    numcodec: typing.ClassVar[typing.Type[imagecodecs.numcodecs.Deflate]] = imagecodecs.numcodecs.Deflate
+
+    def decode(self, b: bytes, ifd: IFD, endian: Endian) -> np.ndarray:
+        dtype = np.dtype(
+            SAMPLE_DTYPES[(ifd.tags['SampleFormat'].value[0], ifd.tags['BitsPerSample'].value[0])]
+        )
+        decoded = self.numcodec().decode(b)
+        arr = np.frombuffer(decoded, dtype).reshape(
+            ifd.tags['TileHeight'].value[0], ifd.tags['TileWidth'].value[0], ifd.tags['SamplesPerPixel'].value[0]
+        )
+        
+        # Unpredict
+        if ifd.tags['Predictor'].value[0] == 2:
+            imagecodecs.delta_decode(arr, out=arr, axis=-1)
+        
+        return arr
 
 
 @dataclass
