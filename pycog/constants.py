@@ -1,3 +1,6 @@
+from pycog.tags import JPEGTables
+from pycog.types import TagType
+
 # https://github.com/cgohlke/tifffile/blob/master/tifffile/tifffile.py#L7901-L7986
 # Map SampleFormat and BitsPerSample tags to numpy dtype
 SAMPLE_DTYPES = {
@@ -86,3 +89,10 @@ SAMPLE_DTYPES = {
     (1, (5, 6, 5)): "B",
     # COMPLEXINT : not supported by numpy
 }
+
+JPEG_TABLES = JPEGTables(
+    type=TagType(format='B', length=1, value=7),
+    count=73,
+    size=73,
+    value=(255, 216, 255, 219, 0, 67, 0, 8, 6, 6, 7, 6, 5, 8, 7, 7, 7, 9, 9, 8, 10, 12, 20, 13, 12, 11, 11, 12, 25, 18, 19, 15, 20, 29, 26, 31, 30, 29, 26, 28, 28, 32, 36, 46, 39, 32, 34, 44, 35, 28, 28, 40, 55, 41, 44, 48, 49, 52, 52, 52, 31, 39, 57, 61, 56, 50, 60, 46, 51, 52, 50, 255, 217)
+    )
