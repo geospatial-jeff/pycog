@@ -17,7 +17,7 @@ from pycog.constants import SAMPLE_DTYPES
 @dataclass
 class Codec(abc.ABC):
     id: typing.ClassVar[int]
-    numcodec: typing.ClassVar[typing.Type[numcodecs.abc.Codec]]
+    # numcodec: numcodecs.abc.Codec = None
 
     @abc.abstractmethod
     def decode(self, b: bytes, ifd: IFD, endian: Endian) -> np.ndarray:
@@ -38,7 +38,7 @@ class Codec(abc.ABC):
 @dataclass
 class Jpeg(Codec):
     id: typing.ClassVar[int] = 7
-    numcodec: typing.ClassVar[typing.Type[imagecodecs.numcodecs.Jpeg]] = imagecodecs.numcodecs.Jpeg
+    numcodec: imagecodecs.numcodecs.Jpeg = field(default_factory=imagecodecs.numcodecs.Jpeg)
 
     def create_tags(self) -> typing.Dict[int, Tag]:
         """Create compression-specific tiff tags."""
@@ -62,24 +62,26 @@ class Jpeg(Codec):
             *jpeg_tables.value,
         )
         
-        codec = self.numcodec(tables=jpeg_table_bytes)
+        codec = self.numcodec.__class__(tables=jpeg_table_bytes)
         return codec.decode(b)
     
     def encode(self, arr: np.ndarray) -> bytes:
         """Encode numpy array to bytes."""
-        return self.numcodec().encode(arr)
+        return self.numcodec.encode(arr)
 
 
+@dataclass
 class Deflate(Codec):
     id: typing.ClassVar[int] = 8
-    numcodec: typing.ClassVar[typing.Type[imagecodecs.numcodecs.Deflate]] = imagecodecs.numcodecs.Deflate
+    numcodec: imagecodecs.numcodecs.Deflate = field(default_factory=imagecodecs.numcodecs.Deflate)
 
     def decode(self, b: bytes, ifd: IFD, endian: Endian) -> np.ndarray:
         """Decode bytes into a numpy array."""
         dtype = np.dtype(
             SAMPLE_DTYPES[(ifd.tags['SampleFormat'].value[0], ifd.tags['BitsPerSample'].value[0])]
         )
-        decoded = self.numcodec().decode(b)
+        codec = self.numcodec.__class__()
+        decoded = codec.decode(b)
         arr = np.frombuffer(decoded, dtype).reshape(
             ifd.tags['TileHeight'].value[0], ifd.tags['TileWidth'].value[0], ifd.tags['SamplesPerPixel'].value[0]
         )
