@@ -1,11 +1,10 @@
-from collections import OrderedDict
 import math
 import numpy as np
 from io import IOBase
 import struct
 
 from pycog.codecs import codec_registry
-from pycog.tags import tag_registry
+from pycog.tags import tag_registry, GeoKeyDirectory
 from pycog.types import IFD, TAG_TYPES, Cog, Endian, Header, TiffVersion
 
 
@@ -43,7 +42,7 @@ def open_cog(file_handle: IOBase, header_size: int = 65536) -> Cog:
         )
 
         # Read each tag.
-        tags = OrderedDict()
+        tags = {}
         for idx in range(tag_count):
             # Tags are always 12 bytes each.
             tag_start = next_ifd_offset + 2 + (12 * idx)

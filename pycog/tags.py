@@ -217,7 +217,7 @@ class JPEGTables(BaselineTag):
 
 
 @dataclass
-class YCbCrSubSampling(BaselineTag):
+class ChromaSubSampling(BaselineTag):
     """Specifices subsampling factors for JPEG/YCbCr images.
     https://www.awaresystems.be/imaging/tiff/tifftags/ycbcrsubsampling.html
     """

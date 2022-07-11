@@ -1,8 +1,6 @@
-import collections
 import struct
 import typing
 
-from pycog.constants import JPEG_TABLES
 from pycog.codecs import Codec, codec_registry
 from pycog.types import Cog, Endian, Header
 from pycog.reader import read_tile
@@ -38,15 +36,14 @@ def write_cog(cog: Cog, dst_codec: typing.Optional[Codec] = None) -> bytes:
         dst_codec = dst_codec or src_codec
 
         # HACKY STUFF
+        # TODO: Rewrite all of this
         tile_byte_counts = []
+        from copy import deepcopy
+        old_ifd = deepcopy(ifd)
         if src_codec != dst_codec:
             ifd.tags.update(dst_codec.create_tags())
-        
-        ifd.tags = collections.OrderedDict(sorted(ifd.tags.items(), key=lambda t: t[1].id))
-        # END OF HACKY STUFF
 
-        # Update compression tag
-        ifd.tags['Compression'].value = (dst_codec.id,)
+        # END OF HACKY STUFF
 
         for (tile_offset, tile_byte_count) in zip(ifd.tags['TileOffsets'].value, ifd.tags['TileByteCounts'].value):
             cog.file_handle.seek(tile_offset)
@@ -55,7 +52,7 @@ def write_cog(cog: Cog, dst_codec: typing.Optional[Codec] = None) -> bytes:
             # Recompress the data if appropriate
             if src_codec != dst_codec:
                 # First decompress the data
-                decoded_content = src_codec.decode(content, ifd, cog.header.endian)
+                decoded_content = src_codec.decode(content, old_ifd, cog.header.endian)
                 
                 # Compress
                 encoded_content = dst_codec.encode(decoded_content)
@@ -69,9 +66,7 @@ def write_cog(cog: Cog, dst_codec: typing.Optional[Codec] = None) -> bytes:
         # MORE HACKY STUFF
         if tile_byte_counts:
             ifd.tags['TileByteCounts'].value = tuple(tile_byte_counts)
-
-
-
+    
     # Adjust tile offsets
     image_data_offset = cog.header_size
     for ifd in cog.ifds[::-1]:

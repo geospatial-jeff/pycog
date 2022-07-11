@@ -1,7 +1,6 @@
 import enum
 from io import IOBase
 import typing
-from collections import OrderedDict
 from dataclasses import dataclass
 
 
@@ -52,7 +51,7 @@ class IFD:
 
     tag_count: int
     next_ifd_offset: int
-    tags: OrderedDict[str, typing.Any]
+    tags: typing.Dict[str, typing.Any]
 
 
 @dataclass

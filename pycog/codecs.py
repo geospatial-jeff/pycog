@@ -1,5 +1,6 @@
 import abc
 from dataclasses import dataclass, field
+import enum
 import struct
 import typing
 
@@ -8,9 +9,9 @@ import numcodecs.abc
 import imagecodecs
 import imagecodecs.numcodecs
 
-from pycog.constants import JPEG_TABLES
-from pycog.types import IFD, Endian,TagType, TAG_TYPES
-from pycog.tags import Tag, Compression
+from pycog.constants import JPEG_TABLES_RGB
+from pycog.types import IFD, Endian, TagType, TAG_TYPES
+from pycog.tags import ChromaSubSampling, Tag, Compression, PhotometricInterpretation
 from pycog.constants import SAMPLE_DTYPES
 
 
@@ -40,33 +41,71 @@ class Jpeg(Codec):
     id: typing.ClassVar[int] = 7
     numcodec: imagecodecs.numcodecs.Jpeg = field(default_factory=imagecodecs.numcodecs.Jpeg)
 
+
+    class Photometric(enum.IntEnum):
+        """https://github.com/cgohlke/imagecodecs/blob/master/imagecodecs/_jpeg8.pyx#L403"""
+        MINISWHITE = 0
+        MINISBLACK = 1
+        RGB = 2
+        CMYK = 5
+        YCBCR = 6
+
+
     def create_tags(self) -> typing.Dict[int, Tag]:
         """Create compression-specific tiff tags."""
-        return {
-            JPEG_TABLES.id: JPEG_TABLES,
-            Compression.id: Compression(
+        tags = {
+            JPEG_TABLES_RGB.name: JPEG_TABLES_RGB,
+            Compression.name: Compression(
                 type=TAG_TYPES[3],
                 count=1,
                 size=2,
                 value=(7,)
             )
-            # TODO: Photometric
         }
+        if self.numcodec.colorspace_data:
+            tags[PhotometricInterpretation.name] = PhotometricInterpretation(
+                type=TAG_TYPES[3],
+                count=1,
+                size=2,
+                value=(getattr(self.Photometric, self.numcodec.colorspace_data).value,)
+            )
+        if self.numcodec.subsampling:
+            tags[ChromaSubSampling.name] = ChromaSubSampling(
+                type=TAG_TYPES[3],
+                count=2,
+                size=4,
+                value=self.numcodecs.subsampling
+            )
+        return tags
+
 
     def decode(self, b: bytes, ifd: IFD, endian: Endian) -> np.ndarray:
         """Decode bytes into a numpy array."""
         jpeg_tables = ifd.tags['JPEGTables']
-        # TODO: Support photometric/colorspace
         jpeg_table_bytes = struct.pack(
             f"{endian.value}{jpeg_tables.count}{jpeg_tables.type.format}",
             *jpeg_tables.value,
         )
-        
-        codec = self.numcodec.__class__(tables=jpeg_table_bytes)
+
+        try:
+            subsampling = ifd.tags['ChromaSubSampling'].value
+        except KeyError:
+            subsampling = None
+
+        codec = self.numcodec.__class__(
+            tables=jpeg_table_bytes,
+            # TOOD: I think imagecodecs might infer `colorspace_jpeg`
+            colorspace_jpeg=self.Photometric(ifd.tags['PhotometricInterpretation'].value[0]).name,
+            colorspace_data=self.Photometric.RGB.name,
+            subsampling=subsampling
+        )
+        print("DECOMPRESSING WITH: ", codec)
         return codec.decode(b)
     
     def encode(self, arr: np.ndarray) -> bytes:
         """Encode numpy array to bytes."""
+        print("COMPRESSING WITH: ", self.numcodec)
+
         return self.numcodec.encode(arr)
 
 
