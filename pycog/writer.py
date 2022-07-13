@@ -28,31 +28,19 @@ def write_cog(cog: Cog, dst_codec: typing.Optional[Codec] = None) -> bytes:
     # https://gdal.org/drivers/raster/cog.html#header-ghost-area
     cog.header.first_ifd_offset = 8
 
-
-    # Read image data from the COG.
     image_segments = []
     for ifd in cog.ifds[::-1]:
-        src_codec = codec_registry.get(ifd.tags['Compression'].value[0])
-        dst_codec = dst_codec or src_codec
-
-        # HACKY STUFF
-        # TODO: Rewrite all of this
+        src_codec = codec_registry.get(ifd.tags['Compression'].value[0]).create_from_ifd(ifd, cog.header.endian)
         tile_byte_counts = []
-        from copy import deepcopy
-        old_ifd = deepcopy(ifd)
-        if src_codec != dst_codec:
-            ifd.tags.update(dst_codec.create_tags())
-
-        # END OF HACKY STUFF
-
+        
         for (tile_offset, tile_byte_count) in zip(ifd.tags['TileOffsets'].value, ifd.tags['TileByteCounts'].value):
             cog.file_handle.seek(tile_offset)
             content = cog.file_handle.read(tile_byte_count)
 
             # Recompress the data if appropriate
-            if src_codec != dst_codec:
+            if dst_codec:
                 # First decompress the data
-                decoded_content = src_codec.decode(content, old_ifd, cog.header.endian)
+                decoded_content = src_codec.decode(content, ifd, cog.header.endian)
                 
                 # Compress
                 encoded_content = dst_codec.encode(decoded_content)
@@ -62,10 +50,14 @@ def write_cog(cog: Cog, dst_codec: typing.Optional[Codec] = None) -> bytes:
                 image_segments.append(content)
                 # SANITY CHECK
                 assert len(content) == tile_byte_count
-        
+
         # MORE HACKY STUFF
-        if tile_byte_counts:
+        if dst_codec:
             ifd.tags['TileByteCounts'].value = tuple(tile_byte_counts)
+            ifd.tags.update(dst_codec.create_tags())
+            del ifd.tags['JPEGTables']
+            # Tags must be in ascending order
+            # ifd.tags = dict(sorted(ifd.tags.items(), key=lambda t: t[1].id))
     
     # Adjust tile offsets
     image_data_offset = cog.header_size

@@ -123,7 +123,7 @@ def read_tile(x: int, y: int, z: int, cog: Cog, decode: bool = True) -> bytes | 
     # This type divergence is weird.
     if decode:
         compression = ifd.tags['Compression'].value[0]
-        codec = codec_registry.get(compression)
+        codec = codec_registry.get(compression).create_from_ifd(ifd, cog.header.endian)
         if not codec:
             raise NotImplementedError(f"Compression {compression} is not supported.")
         tile_content = codec.decode(tile_content, ifd, cog.header.endian)
