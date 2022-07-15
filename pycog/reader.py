@@ -126,6 +126,6 @@ def read_tile(x: int, y: int, z: int, cog: Cog, decode: bool = True) -> bytes | 
         codec = codec_registry.get(compression).create_from_ifd(ifd, cog.header.endian)
         if not codec:
             raise NotImplementedError(f"Compression {compression} is not supported.")
-        tile_content = codec.decode(tile_content, ifd, cog.header.endian)
+        tile_content = codec.decode(tile_content)
 
     return tile_content

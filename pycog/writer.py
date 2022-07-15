@@ -1,8 +1,12 @@
 import struct
 import typing
 
+import numpy as np
+
 from pycog.codecs import Codec, codec_registry
 from pycog.types import Cog, Endian, Header
+from pycog.tags import BitsPerSample, SampleFormat
+from pycog.types import TagType
 from pycog.reader import read_tile
 
 _ENDIAN_BYTES_REVERSE = {Endian.big: b"MM", Endian.little: b"II"}
@@ -20,7 +24,7 @@ def write_header(header: Header) -> bytes:
     )
 
 
-def write_cog(cog: Cog, dst_codec: typing.Optional[Codec] = None) -> bytes:
+def write_cog(cog: Cog, dst_codec: typing.Optional[Codec] = None, bands: typing.Optional[typing.List[int]] = None) -> bytes:
     # TODO: Store image data
     endian = cog.header.endian
 
@@ -32,7 +36,7 @@ def write_cog(cog: Cog, dst_codec: typing.Optional[Codec] = None) -> bytes:
     for ifd in cog.ifds[::-1]:
         src_codec = codec_registry.get(ifd.tags['Compression'].value[0]).create_from_ifd(ifd, cog.header.endian)
         tile_byte_counts = []
-        
+
         for (tile_offset, tile_byte_count) in zip(ifd.tags['TileOffsets'].value, ifd.tags['TileByteCounts'].value):
             cog.file_handle.seek(tile_offset)
             content = cog.file_handle.read(tile_byte_count)
@@ -40,24 +44,48 @@ def write_cog(cog: Cog, dst_codec: typing.Optional[Codec] = None) -> bytes:
             # Recompress the data if appropriate
             if dst_codec:
                 # First decompress the data
-                decoded_content = src_codec.decode(content, ifd, cog.header.endian)
-                
+                decoded_content = src_codec.decode(content)
+                if bands:
+                    decoded_content = np.stack(
+                        [decoded_content[..., band] for band in bands], axis=-1
+                    )
                 # Compress
                 encoded_content = dst_codec.encode(decoded_content)
                 image_segments.append(encoded_content)
                 tile_byte_counts.append(len(encoded_content))
             else:
                 image_segments.append(content)
-                # SANITY CHECK
-                assert len(content) == tile_byte_count
 
         # MORE HACKY STUFF
         if dst_codec:
             ifd.tags['TileByteCounts'].value = tuple(tile_byte_counts)
+
+            # Update tags
+            for tag in dst_codec.delete_tags():
+                ifd.tags.pop(tag, None)
+
             ifd.tags.update(dst_codec.create_tags())
-            del ifd.tags['JPEGTables']
             # Tags must be in ascending order
-            # ifd.tags = dict(sorted(ifd.tags.items(), key=lambda t: t[1].id))
+            ifd.tags = dict(sorted(ifd.tags.items(), key=lambda t: t[1].id))
+        
+
+        if bands:
+            band_count = len(bands)
+            ifd.tags['SamplesPerPixel'].value = (band_count,)
+            ifd.tags['SampleFormat'] = SampleFormat(
+                type=TagType(format='H', length=2, value=3),
+                count=band_count,
+                size=band_count * 2,
+                value=(ifd.tags['SampleFormat'].value[0],) * band_count
+            )
+            ifd.tags['BitsPerSample'] = BitsPerSample(
+                type=TagType(format='H', length=2, value=3),
+                count=band_count,
+                size=band_count * 2,
+                value=(ifd.tags['BitsPerSample'].value[0],) * band_count
+            )
+            if band_count <= 3:
+                del ifd.tags['ExtraSamples']
     
     # Adjust tile offsets
     image_data_offset = cog.header_size
