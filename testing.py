@@ -1,0 +1,44 @@
+from pycog.reader import open_cog
+from pycog.writer import write_cog
+from pycog.tags import tag_registry, ImageWidth, ImageHeight, TileByteCounts, TileOffsets
+
+# Register tags
+tag_registry.add(
+    ImageWidth,
+    ImageHeight,
+    TileByteCounts,
+    TileOffsets
+)
+
+# Open the COG.
+with open("cog.tif", "rb") as f:
+    data = f.read()
+
+# Read the COG into pycog types.
+cog = open_cog(data)
+
+# Write COG back to bytes.
+cog_bytes = write_cog(cog)
+
+# Read it back into pycog types.
+another_cog = open_cog(cog_bytes)
+
+# Make sure both COGs have the same header
+assert cog.header == another_cog.header
+
+# Make sure both COGs have the same number of IFDs.
+assert len(cog.ifds) == len(another_cog.ifds)
+
+for (cog_ifd, another_cog_ifd) in zip(cog.ifds, another_cog.ifds):
+    # Make sure both tags are present
+    assert (
+        list(cog_ifd.tags)
+        == list(another_cog_ifd.tags)
+        == ["ImageWidth", "ImageHeight", "TileOffsets", "TileByteCounts"]
+    )
+
+    # Make sure tags are the same
+    assert cog_ifd.tags["ImageWidth"] == another_cog_ifd.tags["ImageWidth"]
+    assert cog_ifd.tags["ImageHeight"] == another_cog_ifd.tags["ImageHeight"]
+    assert cog_ifd.tags["TileOffsets"] == another_cog_ifd.tags["TileOffsets"]
+    assert cog_ifd.tags["TileByteCounts"] == another_cog_ifd.tags["TileByteCounts"]
